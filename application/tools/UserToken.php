@@ -7,14 +7,18 @@ class UserToken{
     public function getToken($user){
         $userinfo = $user->username.$user->password;
         // 存储token
-        $token = md5($userinfo.sha1(substr(time(),2,5)))."_".time();
+        $token = md5($userinfo.sha1(substr(time(),2,8)))."_".time();
         $user->token = $token;
         $user->save();
         return $token;
     }
 
     // 验证token
-    public function checkToken($token){
+    public function checkToken(){
+        $token = request()->header("Authorization");
+        if($token == ""){
+            return false;
+        }
         $user = User::where("token", $token)->find();
         if($user != null){
             $time = explode("_", $user->token);

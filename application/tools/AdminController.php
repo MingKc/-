@@ -21,9 +21,10 @@ class AdminController extends Controller{
 		// 允许访问控制器方法
 		$allow="User/register,User/login";
 		$usertoken = new UserToken();
-		$token = request()->header("token");
 		if(strpos($allow, $now_action) === false){
-			if($token == ""||!$usertoken->checkToken($token)){
+			if(!$usertoken->checkToken()){
+				echo dump(request());
+				exit;
 				echo jsonAPI("无效token!", 401);
 				exit;
 			}else{
@@ -31,14 +32,14 @@ class AdminController extends Controller{
 				$user = new User();
 				$role = new Role();
 				// 根据id查找用户信息中的角色id
-				$user_id = $usertoken->checkToken($token);
+				$user_id = $usertoken->checkToken();
 				$userinfo = $user->find($user_id);
 				$role_id = $userinfo["role_id"];
 				// 根据角色id查看拥有权限
 				$role_info = $role->find($role_id);
 				$auth = $role_info["role_auth_ac"];
-				echo dump($role_info);
-				die;
+				// echo dump($role_info);
+				// die;
 				if(strpos($auth, $now_action) === false && strpos($allow, $now_action) === false){
 					// 没有访问权限
 					echo jsonAPI("没有访问权限!", 403);

@@ -24,69 +24,7 @@ class User extends AdminController{
         // 返回token
         $usertoken = new UserToken();
         $token = $usertoken->getToken($user);
-        // 查询用户历史最近的10条健康数据
-        $healthList = UserHealth::where("user_id", $user->user_id)->limit(10)->order("create_time","desc")->select();
-        // 体温
-        $temperature = array();
-        // 血压
-        $blood = array();
-        // 心率
-        $heart = array();
-        // 时间
-        $date = array();
-        foreach ($healthList as $key => $value) {
-            $temperature[] = $value->temperature;
-            $blood[] = $value->blood_pressure;
-            $heart[] = $value->heart_rate;
-            $date[] = $value->create_time;
-        }
-        $health = [
-            "grid" => [
-                "bottom" => "3%",
-                "containLabel" => true,
-                "left" => "3%",
-                "right" => "4%"
-            ],
-            "legend" => ["体温",  "血压", "心率"],
-            "series" => [
-                [
-                    "areaStyle" => ["normal" => ""],
-                    "data" => $temperature,
-                    "name" => "体温",
-                    "stack" => "温度",
-                    "type" => "line"
-                ],
-                [
-                    "areaStyle" => ["normal" => ""],
-                    "data" => $blood,
-                    "name" => "血压",
-                    "stack" => "温度",
-                    "type" => "line"
-                ],
-                [
-                    "areaStyle" => ["normal" => ""],
-                    "data" => $heart,
-                    "name" => "心率",
-                    "stack" => "次数",
-                    "type" => "line"
-                ],
-            ],
-            "title" => "健康数据",
-            "tooltip" => [
-                "axisPointer" => [
-                    "label" => ["backgroundColor" => "#E9EEF3"],
-                    "type" =>"cross"
-                ],
-                "trigger" => "axis"
-            ],
-            "xAxis" => [
-                "boundaryGap" => false,
-                "data" => $date
-            ],
-            "yAxis" => ["type" => "value"]
-        ];
-
-        return json($health);
+        
         $data = [
             "id" => $user->user_id,
             "token" => $token
