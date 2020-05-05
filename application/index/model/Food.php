@@ -9,6 +9,7 @@ class Food extends Model{
         $food = array();
         foreach ($foodList as $key => $value) {
             $food[] = [
+                    "food_id" => $value->food_id,
                     "food_name" => $value->food_name,
                     "fodd_price" => $value->food_price
                 ];
