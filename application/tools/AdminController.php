@@ -23,8 +23,6 @@ class AdminController extends Controller{
 		$usertoken = new UserToken();
 		if(strpos($allow, $now_action) === false){
 			if(!$usertoken->checkToken()){
-				echo dump(request());
-				exit;
 				echo jsonAPI("无效token!", 401);
 				exit;
 			}else{

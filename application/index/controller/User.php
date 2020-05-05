@@ -4,7 +4,7 @@ use app\tools\AdminController;
 use app\index\model\User as UserModel;
 use app\tools\UserToken;
 use app\index\model\UserHealth;
-
+use app\index\model\UserEstimate;
 
 class User extends AdminController{
     // 用户登录
@@ -47,9 +47,13 @@ class User extends AdminController{
             "password" => md5($data["password"])
             ]);
         if($user->save()){
-            return jsonAPI("创建成功！", 200);
-        }else{
-            return jsonAPI("创建失败！", 400);
+            $userEstimate = new UserEstimate([
+                    "user_id" => $user->user_id
+                ]);
+            if($userEstimate->save()){
+                return jsonAPI("创建成功！", 200);
+            }
         }
+        return jsonAPI("创建失败！", 400); 
     }
 }
