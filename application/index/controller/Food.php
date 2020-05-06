@@ -7,30 +7,49 @@ class Food extends AdminController{
     // 查询菜品分类查询菜单
     public function list(){
         $data = processRequest();
-        // 获取食品分类id
-        if(!isset($data["cate"])){
+        // 获取当前页码和每页条数
+        if(!isset($data["pagenum"]) || !isset($data["pagesize"])){
             return jsonAPI("查询参数为空!", 400);
         }
-        $cate = $data["cate"];
+        $pagenum = $data["pagenum"];
+        $pagesize = $data["pagesize"];
         $foodModel = new FoodModel();
-        $cateList = $foodModel->where("food_cate", $cate)->select();
-        $food = $foodModel->getList($cateList);
-        return jsonAPI("查询成功！", 200, $food);
+        
+        if(isset($data["cate"])){
+            // 根据商品分类查询
+            $cate = $data["cate"];
+            $total  = $foodModel->where("food_cate", $cate)->count();
+            $list = $foodModel->where("food_cate", $cate)->page($pagenum, $pagesize)->select();
+        }else if(isset($data["food_name"])){
+            //根据名称查询菜品
+            $name = $data["food_name"];
+            $total = $foodModel->where("food_name", "like", "%".$name."%")->count();
+            $list = $foodList = $foodModel->where("food_name", "like", "%".$name."%")->page($pagenum, $pagesize)->select();
+        }else{
+            return jsonAPI("查询参数为空!", 400);
+        }
+        $food = $foodModel->getList($list);
+        $data = [
+            "total" => $total,
+            "pagenum" => $pagenum,
+            "food" => $food
+        ];
+        return jsonAPI("查询成功！", 200, $data);
     }
 
     //根据名称查询菜品
-    public function query(){
-        $data = processRequest();
-        //获取菜品名称
-        if(!isset($data["food_name"])){
-            return jsonAPI("查询参数为空!", 400);
-        }
-        $name = $data["food_name"];
-        $foodModel = new FoodModel();
-        $foodList = $foodModel->where("food_name", "like", "%".$name)->select();
-        $food = $foodModel->getList($foodList);
-        return jsonAPI("查询成功！", 200, $food);
-    }
+    // public function query(){
+    //     $data = processRequest();
+    //     //获取菜品名称
+    //     if(!isset($data["food_name"])){
+    //         return jsonAPI("查询参数为空!", 400);
+    //     }
+    //     $name = $data["food_name"];
+    //     $foodModel = new FoodModel();
+    //     $foodList = $foodModel->where("food_name", "like", "%".$name."%")->select();
+    //     $food = $foodModel->getList($foodList);
+    //     return jsonAPI("查询成功！", 200, $food);
+    // }
 
     //菜品添加
     public function add(){
