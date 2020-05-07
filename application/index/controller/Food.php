@@ -24,7 +24,7 @@ class Food extends AdminController{
             //根据名称查询菜品
             $name = $data["food_name"];
             $total = $foodModel->where("food_name", "like", "%".$name."%")->count();
-            $list = $foodList = $foodModel->where("food_name", "like", "%".$name."%")->page($pagenum, $pagesize)->select();
+            $list = $foodModel->where("food_name", "like", "%".$name."%")->page($pagenum, $pagesize)->select();
         }else{
             return jsonAPI("查询参数为空!", 400);
         }
@@ -50,6 +50,17 @@ class Food extends AdminController{
     //     $food = $foodModel->getList($foodList);
     //     return jsonAPI("查询成功！", 200, $food);
     // }
+
+    public function upload(){
+        $file = request()->file("image");
+        $info = $file->move(ROOT_PATH."uploads/image");
+        if($info){
+            return "server\\uploads\\image\\".$info->getSaveName();
+        }else{                              
+            //  上传失败获取错误信息                     
+            return $file->getError();              
+        }
+    }
 
     //菜品添加
     public function add(){
