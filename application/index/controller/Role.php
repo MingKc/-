@@ -63,7 +63,7 @@ class Role extends AdminController{
     }
 
     // 修改角色信息
-    public function modifyRole(){
+    public function modify(){
         $data = processRequest();
         if(!isset($data["role_id"]) || !isset($data["role_name"]) || !isset($data["role_desc"])){
             return jsonAPI("请求参数为空！", 401);
@@ -78,11 +78,18 @@ class Role extends AdminController{
     }
 
     // 修改角色权限
-    public function roleAuth(){
+    public function auth(){
         $data = processRequest();
-        if(!isset($data["role_id"]) || !isset("role_auth_ids")){
+        if(!isset($data["role_id"]) || !isset($data["role_auth_ids"])){
             return jsonAPI("请求参数为空！", 401);
         }
-        
+        $role = RoleModel::where("role_id", $data["role_id"])->find();
+        $role_auth = $role->saveAuth($data["role_auth_ids"]);
+        $role->role_auth_ids = $data["role_auth_ids"];
+        $role->role_auth_ac = $role_auth;
+        if($role->save()){
+            return jsonAPI("权限分配成功！", 200);
+        }
+        return jsonAPI("权限分配失败！", 500);
     }
 }

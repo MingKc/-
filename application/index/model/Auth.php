@@ -5,7 +5,7 @@ use app\index\model\Role;
 
 class Auth extends Model{
 
-    // 获取当前角色的一级权限
+    // 获取当前角色的权限
     public function level($role_id){
         $role = Role::where("role_id", $role_id)->find();
         $role_auth_ids = $role->role_auth_ids;
