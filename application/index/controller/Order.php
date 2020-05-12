@@ -92,7 +92,8 @@ class Order extends AdminController{
         if(!isset($data["order_price"]) || !isset($data["order_desc"])){
             return jsonAPI("提交参数为空！", 401);
         }
-        $order_desc = $data["order_desc"];
+        // 转成数组对象
+        $order_desc = json_decode($data["order_desc"]);
         // 保存订单到order表中
         $order = new OrderModel(["user_id" => $user_id, "order_price" => $data["order_price"]]);
         if(!$order->save()){
@@ -104,9 +105,9 @@ class Order extends AdminController{
             $list[] = [
                 "order_id" => $order_id,
                 "user_id" => $user_id,
-                "food_id" => $order_desc[$i]['food_id'],
-                "food_number" => $order_desc[$i]['food_number'],
-                "food_total_price" => $order_desc[$i]['food_total_price']
+                "food_id" => $order_desc[$i]->id,
+                "food_number" => $order_desc[$i]->number,
+                "food_total_price" => $order_desc[$i]->total_price
             ]; 
         }
         $order_foods = new OrderFoods();

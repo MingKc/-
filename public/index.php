@@ -22,4 +22,4 @@ define('APP_PATH', __DIR__ . '/../application/');
 require __DIR__ . '/../thinkphp/start.php';
 
 // 定义路由规则
-Route::get("health/:id", "Health/query");
+// Route::get("health/:id", "Health/query");

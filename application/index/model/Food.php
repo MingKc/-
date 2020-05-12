@@ -11,7 +11,8 @@ class Food extends Model{
             $food[] = [
                     "food_id" => $value->food_id,
                     "food_name" => $value->food_name,
-                    "food_price" => $value->food_price
+                    "food_price" => $value->food_price,
+                    "food_pics" => "http://localhost:80/".$value->food_pics
                 ];
         }
         return $food;

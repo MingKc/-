@@ -13,6 +13,7 @@
     // 解析请求类型
     function processRequest(){
         $request_method = strtolower($_SERVER['REQUEST_METHOD']);
+        $data = array();
         switch ($request_method){
            case 'get':
            $data = $_GET;
