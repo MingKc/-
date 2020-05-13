@@ -34,15 +34,17 @@ class Role extends AdminController{
         return jsonAPI("角色删除失败！", 500);
     }
 
-    // 获取角色及权限列表
+    // 获取所有角色及权限列表
     public function list(){
+        $data = processRequest();
         $role = new RoleModel();
-        $roleList = $role->select();
-        $data = array();
-        foreach ($roleList as $key => $value) {
-            $role_id = $value->role_id;
+        if(isset($data["role_id"])){
+            $roleList = $role->where('role_id', $data["role_id"])->find();
+            if(!$roleList){
+                return jsonAPI("查询角色不存在！", 500);
+            }
             $auth = new AuthModel();
-            $list = $auth->level($role_id);
+            $list = $auth->level($data["role_id"]);
             if($list !== null){
                 $one = $list["one"];
                 $two = $list["two"];
@@ -52,12 +54,35 @@ class Role extends AdminController{
                 // 将二级权限挂载在一级权限的children
                 $n = $auth->loadChildren($one, $m);
             }
-            $data[] = [
-                "role_id" => $role_id,
-                "role_name" => $value->role_name,
-                "role_desc" => $value->role_desc,
+            $data = [
+                "role_id" => $data["role_id"],
+                "role_name" => $roleList->role_name,
+                "role_desc" => $roleList->role_desc,
                 "children" => $n
             ];
+        }else{
+            $roleList = $role->select();
+            $data = array();
+            foreach ($roleList as $key => $value) {
+                $role_id = $value->role_id;
+                $auth = new AuthModel();
+                $list = $auth->level($role_id);
+                if($list !== null){
+                    $one = $list["one"];
+                    $two = $list["two"];
+                    $three = $list["three"];
+                    // 将三级权限挂载在二级权限的children
+                    $m = $auth->loadChildren($two, $three);
+                    // 将二级权限挂载在一级权限的children
+                    $n = $auth->loadChildren($one, $m);
+                }
+                $data[] = [
+                    "role_id" => $role_id,
+                    "role_name" => $value->role_name,
+                    "role_desc" => $value->role_desc,
+                    "children" => $n
+                ];
+            }
         }
         return jsonAPI("角色列表获取成功！", 200, $data);
     }

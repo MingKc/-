@@ -8,18 +8,64 @@ use app\index\model\User;
 class Auth extends AdminController{
     // 权限列表
     public function showlist(){
+        $data = processRequest();
+        if(!isset($data["type"])){
+            return jsonAPI("查询参数为空！", 500);
+        }
+        $type = $data["type"];
         $auth = new AuthModel();
         $authList = $auth->select();
-        $list = array();
-        foreach ($authList as $key => $value) {
-            $list[] = [
-                "auth_id" => $value->auth_id,
-                "auth_name" => $value->auth_name,
-                "pid" => $value->auth_pid,
-                "level" => $value->auth_level 
-            ];
+        if($type === "list"){
+            $list = array();
+            foreach ($authList as $key => $value) {
+                $list[] = [
+                    "auth_id" => $value->auth_id,
+                    "auth_name" => $value->auth_name,
+                    "pid" => $value->auth_pid,
+                    "level" => $value->auth_level 
+                ];
+            }
+            return jsonAPI("查询成功", 200 ,$list);
+        }else if($type === "tree"){
+            // 一级权限菜单
+            $one = array();
+            // 二级权限菜单
+            $two = array();
+            // 三级权限菜单
+            $three = array();
+            foreach ($authList as $key => $value) {
+                if($value->auth_level === 0){
+                    $one[] = [
+                        "auth_id" => $value->auth_id,
+                        "auth_name" => $value->auth_name,
+                        "auth_pid" => $value->auth_pid,
+                        "path" => $value->auth_path,
+                        "children" => []
+                    ];
+                }else if($value->auth_level === 1){
+                    $two[] = [
+                        "auth_id" => $value->auth_id,
+                        "auth_name" => $value->auth_name,
+                        "auth_pid" => $value->auth_pid,
+                        "path" => $value->auth_path,
+                        "children" => []
+                    ];
+                }else if($value->auth_level === 2){
+                    $three[] = [
+                        "auth_id" => $value->auth_id,
+                        "auth_name" => $value->auth_name,
+                        "auth_pid" => $value->auth_pid,
+                        "path" => $value->auth_path
+                    ];
+                }
+            }
+            // 将三级权限挂载在二级权限的children
+            $m = $auth->loadChildren($two, $three);
+            // 将二级权限挂载在一级权限的children
+            $right = $auth->loadChildren($one, $m);
+            return jsonAPI('查询成功！', 200, $right);
         }
-        return jsonAPI("查询成功", 200 ,$list);
+        return jsonAPI("查询失败", 500);
     }
 
     // 左侧菜单栏
@@ -33,6 +79,6 @@ class Auth extends AdminController{
         $one = $right["one"];
         $two = $right["two"];
         $data = $auth->loadChildren($one, $two);
-        return jsonAPI("查询吃成功！", 200, $data);
+        return jsonAPI("查询成功！", 200, $data);
     }
 }

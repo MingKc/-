@@ -56,6 +56,7 @@ class Order extends AdminController{
             $desc[] = [
                 "food_name" => $food->food_name,
                 "food_price" => $food->food_price,
+                "food_total_price" => $value->food_total_price,
                 "food_number" => $value->food_number
             ];
         }
@@ -79,7 +80,7 @@ class Order extends AdminController{
             return jsonAPI("删除订单失败！", 500);
         }
         if($orders->delete()){
-            return jsonAPI("删除订单成功！", 204);
+            return jsonAPI("删除订单成功！", 200);
         }
         return jsonAPI("删除订单失败！", 500);
     }
