@@ -2,6 +2,7 @@
 namespace app\index\controller;
 use app\tools\AdminController;
 use app\index\model\Food as FoodModel;
+use app\index\model\FoodCate;
 
 class Food extends AdminController{
     // 查询菜品分类查询菜单
@@ -16,19 +17,33 @@ class Food extends AdminController{
         $foodModel = new FoodModel();
         
         if(isset($data["cate"])){
-            // 根据商品分类查询
+            // 根据菜品分类查询
             $cate = $data["cate"];
             $total  = $foodModel->where("food_cate", $cate)->count();
             $list = $foodModel->where("food_cate", $cate)->page($pagenum, $pagesize)->select();
+            $food = $foodModel->getList($list);
         }else if(isset($data["food_name"])){
             //根据名称查询菜品
             $name = $data["food_name"];
             $total = $foodModel->where("food_name", "like", "%".$name."%")->count();
             $list = $foodModel->where("food_name", "like", "%".$name."%")->page($pagenum, $pagesize)->select();
+            $food = $foodModel->getList($list);
         }else{
-            return jsonAPI("查询参数为空!", 400);
+            // 查询所有菜品
+            $total = $foodModel->count();
+            $list = $foodModel->page($pagenum, $pagesize)->select();
+            $food = array();
+            foreach ($list as $key => $value) {
+                $cate = FoodCate::where('cate_id', $value->food_cate)->find();
+                $food[] = [
+                        "food_id" => $value->food_id,
+                        "food_name" => $value->food_name,
+                        "food_price" => $value->food_price,
+                        "cate_name" => $cate->cate_name
+                    ];
+            }
         }
-        $food = $foodModel->getList($list);
+
         $data = [
             "total" => $total,
             "pagenum" => $pagenum,
@@ -52,10 +67,10 @@ class Food extends AdminController{
     // }
 
     public function upload(){
-        $file = request()->file("image");
+        $file = request()->file("file");
         $info = $file->move(ROOT_PATH."uploads/image");
         if($info){
-            return "server\\uploads\\image\\".$info->getSaveName();
+            return "server/uploads/file/".$info->getSaveName();
         }else{                              
             //  上传失败获取错误信息                     
             return $file->getError();              
@@ -76,7 +91,7 @@ class Food extends AdminController{
                 "food_pics" => $data["food_pics"]
             ]);
         if($food->save()){
-            return jsonAPI("菜品添加成功！", 201);
+            return jsonAPI("菜品添加成功！", 200);
         }else{
             return jsonAPI("菜品添加失败！", 500);
         }
@@ -93,7 +108,7 @@ class Food extends AdminController{
         $foodModel = new FoodModel();
         $food = $foodModel->where("food_id", $food_id)->delete();
         if($food){
-            return jsonAPI("删除菜品成功！", 204);
+            return jsonAPI("删除菜品成功！", 200);
         }else{
             return jsonAPI("删除菜品失败！", 500);
         }
