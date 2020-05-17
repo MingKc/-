@@ -70,7 +70,7 @@ class Food extends AdminController{
         $file = request()->file("file");
         $info = $file->move(ROOT_PATH."uploads/image");
         if($info){
-            return "server/uploads/file/".$info->getSaveName();
+            return "server/uploads/image/".$info->getSaveName();
         }else{                              
             //  上传失败获取错误信息                     
             return $file->getError();              

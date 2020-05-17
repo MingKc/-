@@ -19,7 +19,7 @@ class AdminController extends Controller{
 		$now_action=$controller."/".$action;
 
 		// 允许访问控制器方法
-		$allow="User/register,User/login";
+		$allow="User/register,User/login,User/check,Auth/menu";
 		$usertoken = new UserToken();
 		if(strpos($allow, $now_action) === false){
 			if(!$usertoken->checkToken()){

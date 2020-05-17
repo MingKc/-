@@ -72,6 +72,9 @@ class Auth extends AdminController{
     public function menu(){
         $userToken = new UserToken();
         $user_id = $userToken->checkToken();
+        if(!$user_id){
+            return jsonAPI("查询失败", 500);
+        }
         $user = User::where("user_id", $user_id)->find();
         $role_id = $user->role_id;
         $auth = new AuthModel();

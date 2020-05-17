@@ -56,4 +56,17 @@ class User extends AdminController{
         }
         return jsonAPI("创建失败！", 400); 
     }
+
+    // 用户名检测
+    public function check(){
+        $data = processRequest();
+        if(!isset($data["username"])){
+            return jsonAPI("请求参数为空！", 500);
+        }
+        $username = UserModel::where("username", $data["username"])->find();
+        if(!$username){
+            return jsonAPI("用户名不存在！", 200);
+        }
+        return jsonAPI("用户名已存在！", 500);
+    }
 }
