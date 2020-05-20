@@ -53,6 +53,8 @@ class Role extends AdminController{
                 $m = $auth->loadChildren($two, $three);
                 // 将二级权限挂载在一级权限的children
                 $n = $auth->loadChildren($one, $m);
+            }else{
+                $n = null;
             }
             $data = [
                 "role_id" => $data["role_id"],
@@ -75,6 +77,8 @@ class Role extends AdminController{
                     $m = $auth->loadChildren($two, $three);
                     // 将二级权限挂载在一级权限的children
                     $n = $auth->loadChildren($one, $m);
+                }else{
+                    $n = null;
                 }
                 $data[] = [
                     "role_id" => $role_id,

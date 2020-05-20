@@ -46,10 +46,7 @@ class Order extends AdminController{
         }
         // 获取订单id
         $order_id = $data["order_id"];
-        $userToken = new UserToken();
-        //获取用户id
-        $user_id = $userToken->checkToken();
-        $orders = OrderFoods::where(["order_id" => $order_id, "user_id" => $user_id])->select();
+        $orders = OrderFoods::where("order_id", $order_id)->select();
         $desc = array();
         foreach ($orders as $key => $value) {
             $food = Food::where("food_id", $value->food_id)->find();
@@ -105,7 +102,6 @@ class Order extends AdminController{
         for ($i=0; $i < count($order_desc); $i++) {
             $list[] = [
                 "order_id" => $order_id,
-                "user_id" => $user_id,
                 "food_id" => $order_desc[$i]->id,
                 "food_number" => $order_desc[$i]->number,
                 "food_total_price" => $order_desc[$i]->total_price
