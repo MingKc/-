@@ -21,12 +21,6 @@
            case 'post':
            $data = $_POST;
            break;
-           case 'put':
-           $data = input('put.');
-           break;
-           case 'delete':
-           $data = $_SERVER['REQUEST_URI'];
-           break;
        }
        return $data;
    }
