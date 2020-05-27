@@ -5,6 +5,7 @@ use app\tools\UserToken;
 use app\index\model\Order as OrderModel;
 use app\index\model\OrderFoods;
 use app\index\model\Food;
+use think\Db;
 
 class Order extends AdminController{
     //订单查询
@@ -20,7 +21,7 @@ class Order extends AdminController{
         //获取用户id
         $user_id = $userToken->checkToken();
         $total = OrderModel::where("user_id", $user_id)->count();
-        $orderLists = OrderModel::where("user_id", $user_id)->page($pagenum, $pagesize)->select();
+        $orderLists = OrderModel::where("user_id", $user_id)->order("create_time", "desc")->page($pagenum, $pagesize)->select();
         $order = array();
         foreach ($orderLists as $key => $value) {
             $order[] = [
@@ -92,26 +93,31 @@ class Order extends AdminController{
         }
         // 转成数组对象
         $order_desc = json_decode($data["order_desc"]);
-        // 保存订单到order表中
-        $order = new OrderModel(["user_id" => $user_id, "order_price" => $data["order_price"]]);
-        if(!$order->save()){
-            return jsonAPI("提交失败！", 500);
-        }
-        $order_id = $order->order_id;
-        $list = array();
-        for ($i=0; $i < count($order_desc); $i++) {
-            $list[] = [
-                "order_id" => $order_id,
-                "food_id" => $order_desc[$i]->id,
-                "food_number" => $order_desc[$i]->number,
-                "food_total_price" => $order_desc[$i]->total_price
-            ]; 
-        }
-        $order_foods = new OrderFoods();
-        if($order_foods->saveAll($list)){
+        // 启动事务
+        Db::startTrans();
+        try{
+            // 保存订单到order表中
+            $order = new OrderModel(["user_id" => $user_id, "order_price" => $data["order_price"]]);
+            $order->save();
+            $order_id = $order->order_id;
+            $list = array();
+            for ($i=0; $i < count($order_desc); $i++) {
+                $list[] = [
+                    "order_id" => $order_id,
+                    "food_id" => $order_desc[$i]->id,
+                    "food_number" => $order_desc[$i]->number,
+                    "food_total_price" => $order_desc[$i]->total_price
+                ]; 
+            }
+            $order_foods = new OrderFoods();
+            $order_foods->saveAll($list);
+            // 提交事务
+            Db::commit();
             return jsonAPI("订单提交成功！", 200);
-        }else{
-            return jsonAPI("订单提交失败！", 500);
+        }catch(Exception $e){
+            // 回滚
+            Db::rollback();
         }
+        return jsonAPI("订单提交失败！", 500);
     }
 }
